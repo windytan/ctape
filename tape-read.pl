@@ -36,7 +36,6 @@ sub bit {
     if (($bitreg >> 9) == 1 && ($bitreg & 1) == 0) {
       $bitsync  = 1;
       $bitcount = 0;
-      print STDERR "bitsync\n";
     } else {
       $bitsync = $bytereg = 0;
     }
@@ -46,19 +45,13 @@ sub bit {
     if (++$bitcount == 10) {
       $bitcount=0;
       if (!(($bitreg >> 9) == 1 && ($bitreg & 1) == 0)) {
-        print STDERR "lost\n";
         die if ($bytesync);
         $bitsync = $bytesync = $bytereg = 0;
       } elsif ($bytesync) {
         print chr(($bitreg >> 1) & 0xFF);
       } else {
         $bytereg = (($bytereg << 8) + (($bitreg >> 1) & 0xFF)) & 0xFFFFFFFF;
-        print STDERR "still sync'd\n";
-        print STDERR sprintf("%08x\n",$bytereg);
-        if ($bytereg == 0x08070504) {
-          print STDERR "OMG Bytesync lol!\n";
-          $bytesync = 1;
-        }
+        $bytesync = 1 if ($bytereg == 0x08070504);
       }
     }
   }
