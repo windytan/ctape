@@ -17,6 +17,6 @@ directly from the sound card and decodes to stdout on the fly.
 
 Requires [SoX](http://sox.sourceforge.net/).
 
-c() Oona "windytan" Räisänen 2012
+© windytan (Oona Räisänen) 2012
 
 MIT license
