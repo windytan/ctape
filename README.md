@@ -6,8 +6,8 @@ resembling that of Commodore Datassette.
 
 Usage:
 
-* tape-write.pl datafile
-* tape-read.pl
+* encoding: `./tape-write.pl FILE`
+* decoding: `./tape-read.pl`
 
 Explanation and videos in [this blog post](http://windytan.blogspot.fi/2012/08/vintage-bits-on-cassettes.html).
 
