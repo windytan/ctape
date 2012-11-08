@@ -33,7 +33,7 @@ sub bit {
   $bitreg = (($bitreg << 1) & 0x3FF) + $b;
 
   if (not $bitsync) {
-    if (($bitreg >> 9) == 1 && ($bitreg & 1) == 0) {
+    if (($bitreg >> 9) && not ($bitreg & 1)) {
       $bitsync  = 1;
       $bitcount = 0;
       print STDERR "bitsync\n";
@@ -45,7 +45,7 @@ sub bit {
 
     if (++$bitcount == 10) {
       $bitcount=0;
-      if (!(($bitreg >> 9) == 1 && ($bitreg & 1) == 0)) {
+      if (!(($bitreg >> 9) && not ($bitreg & 1))) {
         print STDERR "lost\n";
         die if ($bytesync);
         $bitsync = $bytesync = $bytereg = 0;
