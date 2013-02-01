@@ -44,12 +44,7 @@ sub bit {
 
     if (++$bitcount == 10) {
       $bitcount=0;
-<<<<<<< HEAD
-      if (!(($bitreg >> 9) && not ($bitreg & 1))) {
-        print STDERR "lost\n";
-=======
       if (not (($bitreg >> 9) && not ($bitreg & 1))) {
->>>>>>> 84f6cab15dc286b3c247cb8c709b7bab3591877d
         die if ($bytesync);
         $bitsync = $bytesync = $bytereg = 0;
       } elsif ($bytesync) {
