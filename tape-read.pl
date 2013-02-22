@@ -4,7 +4,7 @@
 #
 # read data from a Compact Cassette
 #
-# (c) Oona "windytan" Räisänen 2012
+# (c) Oona "windytan" Räisänen 2012-2013
 #
 # MIT license
 #
@@ -12,25 +12,29 @@
 use warnings;
 $|++;
 
-open(IN,"rec -t .raw -c 1 -r 32000 -e signed-integer -b 16 -|");
-$prev_a = 0;
-$bitreg = $bytereg = 0;
+use constant BITLEN => 8;
+
+open(IN,"sox -q -t alsa hw:1 -t .raw -c 2 -r 44100 -b 16 -e signed-integer - |");#sinc -10640|");
+#open(IN,"sox -q nauhalle.wav -t .raw -c 2 -r 44100 -b 16 -e signed-integer - |");#sinc -10640|");
+my $prev_c  = 0;
+my $bitreg  = 0;
+my $bytereg = 0;
 while (not eof(IN)) {
   read(IN,$a,2);
-  $a = -unpack("s",$a);
+  read(IN,$b,2);
+  $c = -(unpack("s",$a) + unpack("s",$b));
   $len ++;
-  if ($prev_a > 0 && $a <= 0) {
-    bit($len > 18);
+  if ($prev_c > 0 && $c <= 0) {
+    bit($len > BITLEN*1.5);
     $len = 0;
   }
-  $prev_a = $a;
+  $prev_c = $c;
 }
 close(IN);
 
 sub bit {
-  my $b = $_[0];
 
-  $bitreg = (($bitreg << 1) & 0x3FF) + $b;
+  $bitreg = (($bitreg << 1) & 0x3FF) + $_[0];
 
   if (not $bitsync) {
     if (($bitreg >> 9) && not ($bitreg & 1)) {
