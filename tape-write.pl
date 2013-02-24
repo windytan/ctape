@@ -16,6 +16,7 @@ use warnings;
 use strict;
 
 use constant BITLEN => 8;
+use constant DELAY  => 32;
 
 # start bit (1)
 # 8 data (msb first)
@@ -24,8 +25,34 @@ use constant BITLEN => 8;
 # start byte seq: 0x08 0x07 0x05 0x04
 
 open(IN,$ARGV[0]) or die ($!);
-open(OUT,"|sox -q -t .raw -r 44100 -c 1 -b 16 -e signed-integer - -t alsa hw:1") or die ($!);
-#open(OUT,"|sox -q -t .raw -r 44100 -c 1 -b 16 -e signed-integer - nauhalle.wav") or die ($!);
+open(OUT,"|sox -q -t .raw -r 44100 -c 2 -b 16 -e signed-integer - -t alsa hw:1") or die ($!);
+#open(OUT,"|sox -q -t .raw -r 44100 -c 2 -b 16 -e signed-integer - nauhalle.wav") or die ($!);
+
+my @buffer = ();
+$buffer[0] = pack("s",0);
+
+# Channel & polarity calibration header
+# Left channel:  1 bitlength negative, 3 bitlengths positive
+# Right channel: 2 bitlengths negative, 2 bitlengths positive
+my $round, my $b;
+for $round (0..500) {
+  for $b (0..BITLEN-1) {
+    print OUT pack("s",-15000);
+    print OUT pack("s",-15000);
+  }
+  for $b (0..BITLEN-1) {
+    print OUT pack("s", 15000);
+    print OUT pack("s",-15000);
+  }
+  for $b (0..BITLEN-1) {
+    print OUT pack("s", 15000);
+    print OUT pack("s", 15000);
+  }
+  for $b (0..BITLEN-1) {
+    print OUT pack("s", 15000);
+    print OUT pack("s", 15000);
+  }
+}
 
 # 50-byte lead-in
 putbyte(chr(0xFF)) for (0..49);
@@ -42,6 +69,8 @@ while (not eof(IN)) {
 close(OUT);
 close(IN);
 
+
+
 sub putbyte {
   putbit(1);
   my $shft;
@@ -52,6 +81,21 @@ sub putbyte {
 }
 
 sub putbit {
-  if ($_[0]) { print OUT (pack("s",-20000) x BITLEN)     . (pack("s", 20000) x BITLEN);       }
-  else       { print OUT (pack("s",-10000) x (BITLEN/2)) . (pack("s", 10000) x (BITLEN/2)); }
+  if ($_[0]) {
+    delay_write (pack("s",-30000), BITLEN);
+    delay_write (pack("s", 30000), BITLEN);
+  } else     {
+    delay_write (pack("s",-15000), BITLEN/2);
+    delay_write (pack("s", 15000), BITLEN/2);
+  }
+}
+
+sub delay_write {
+  my $s;
+  for $s (0..$_[1]-1) {
+    push(@buffer, $_[0]);
+    shift(@buffer) if (@buffer > DELAY);
+    print OUT $buffer[$#buffer];
+    print OUT $buffer[0];
+  }
 }

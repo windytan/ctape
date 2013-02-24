@@ -11,9 +11,8 @@ Usage:
 
 Explanation and videos in [this blog post](http://windytan.blogspot.fi/2012/08/vintage-bits-on-cassettes.html).
 
-`tape-write.pl` will produce a file named `nauhalle.wav` which
-can then be recorded on a tape or other media. `tape-read.pl` records
-directly from the sound card and decodes to stdout on the fly.
+`tape-write.pl` encodes the file given on its command line to the sound card. `tape-read.pl` records from
+the sound card and decodes to stdout on the fly.
 
 Requires [SoX](http://sox.sourceforge.net/).
 
