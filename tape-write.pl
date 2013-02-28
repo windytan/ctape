@@ -17,6 +17,7 @@ use strict;
 
 use constant BITLEN => 8;
 use constant DELAY  => 32;
+use constant VOLUME => 0.98;
 
 # start bit (1)
 # 8 data (msb first)
@@ -37,20 +38,20 @@ $buffer[0] = pack("s",0);
 my $round, my $b;
 for $round (0..500) {
   for $b (0..BITLEN-1) {
-    print OUT pack("s",-15000);
-    print OUT pack("s",-15000);
+    print OUT pack("s",-32767 * VOLUME);
+    print OUT pack("s", 32767 * VOLUME);
   }
   for $b (0..BITLEN-1) {
-    print OUT pack("s", 15000);
-    print OUT pack("s",-15000);
+    print OUT pack("s", 32767 * VOLUME);
+    print OUT pack("s",-32767 * VOLUME);
   }
   for $b (0..BITLEN-1) {
-    print OUT pack("s", 15000);
-    print OUT pack("s", 15000);
+    print OUT pack("s", 32767 * VOLUME);
+    print OUT pack("s", 32767 * VOLUME);
   }
   for $b (0..BITLEN-1) {
-    print OUT pack("s", 15000);
-    print OUT pack("s", 15000);
+    print OUT pack("s", 32767 * VOLUME);
+    print OUT pack("s", 32767 * VOLUME);
   }
 }
 
@@ -82,11 +83,11 @@ sub putbyte {
 
 sub putbit {
   if ($_[0]) {
-    delay_write (pack("s",-30000), BITLEN);
-    delay_write (pack("s", 30000), BITLEN);
+    delay_write (pack("s",-32767 * VOLUME), BITLEN);
+    delay_write (pack("s", 32767 * VOLUME), BITLEN);
   } else     {
-    delay_write (pack("s",-15000), BITLEN/2);
-    delay_write (pack("s", 15000), BITLEN/2);
+    delay_write (pack("s",-32767 * VOLUME/2), BITLEN/2);
+    delay_write (pack("s", 32767 * VOLUME/2), BITLEN/2);
   }
 }
 
