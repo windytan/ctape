@@ -15,7 +15,8 @@ Explanation and videos in [this blog post](http://windytan.blogspot.fi/2012/08/v
 the sound card and decodes to stdout on the fly.
 
 A WORD OF WARNING. Before running the script, please make sure
-that your speakers are turned off. The signal is very loud, and
+that your speakers are turned off. For noise immunity, the signal contains
+a lot of power. That means it is very loud, and
 its spectral composition is guaranteed to turn your speakers into
 a long-range acoustic weapon.
 
