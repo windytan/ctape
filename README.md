@@ -6,9 +6,9 @@ resembling that of Commodore Datassette.
 
 Needs a config file named `ctape.conf`. Example:
 
- device -t alsa "hw:0"
- bitlen 16
- volume 0.98
+    device -t alsa "hw:0"
+    bitlen 16
+    volume 0.98
 
 Usage:
 
