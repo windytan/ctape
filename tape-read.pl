@@ -12,42 +12,41 @@
 use warnings;
 $|++;
 
-use constant BITLEN => 8;
-use constant DELAY  => 32;
+my %conf;
+open(IN,"ctape.conf") or die($!);
+for (<IN>) {
+  chomp;
+  $conf{$1} = $2 if (/^(\S+) (.+)/);
+}
+close(IN);
 
-open(IN,"sox -q -t alsa hw:1 -t .raw -c 2 -r 44100 -b 16 -e signed-integer - |");#sinc -10640|");
-#open(IN,"sox -q nauhalle.wav -t .raw -c 2 -r 44100 -b 16 -e signed-integer - |");#sinc -10640|");
+open(IN,"sox -q ".$conf{'device'}." -t .raw -c 1 -r 44100 -b 16 -e signed-integer - |");
 
-# calibrate channel order & polarity
-# (wait for 50 repetitions of (nppp) or (pnnn) on either channel)
+# calibrate polarity
+# (wait for 50 repetitions of (nppp) or (pnnn))
 my $polty = 0;
 while ( (not eof(IN)) && $polty == 0 ) {
-  read(IN,$samp[0],2);
-  read(IN,$samp[1],2);
+  read(IN,$samp,2);
 
-  for $chan (0..1) {
-    $samp[$chan] = unpack("s",$samp[$chan]);
-    $slen[$chan]++;
-    if (($prevsamp[$chan] // 0) * $samp[$chan] < 0) {
-      $calstring[$chan] .= ($prevsamp[$chan] > 0 ? "p" : "n") x round($slen[$chan] / BITLEN);
-      $calstring[$chan] = substr($calstring[$chan],-150) if (length($calstring[$chan]) > 150);
+  $samp = unpack("s",$samp);
+  $slen++;
+  if (($prevsamp // 0) * $samp < 0) {
+    $calstring .= ($prevsamp > 0 ? "p" : "n") x round($slen / $conf{'bitlen'});
+    $calstring = substr($calstring,-150) if (length($calstring) > 150);
 
-      if (round($slen[$chan] / BITLEN) > 0) {
-        if ($calstring[$chan] =~ /(nppp){30}/) {
-          $polty = 1;
-          $leftc = $chan;
-          last;
-        }
-        if ($calstring[$chan] =~ /(pnnn){30}/) {
-          $polty = -1;
-          $leftc = $chan;
-          last;
-        }
+    if (round($slen / $conf{'bitlen'}) > 0) {
+      if ($calstring =~ /(nppp){30}/) {
+        $polty = 1;
+        last;
       }
-      $slen[$chan] = 0;
+      if ($calstring =~ /(pnnn){30}/) {
+        $polty = -1;
+        last;
+      }
     }
-    $prevsamp[$chan] = $samp[$chan];
+    $slen = 0;
   }
+  $prevsamp = $samp;
 }
 
 # read data
@@ -57,17 +56,13 @@ my $prev_c  = 0;
 my $bitreg  = 0;
 my $bytereg = 0;
 while (not eof(IN)) {
-  read(IN,$a[0],2);
-  read(IN,$a[1],2);
+  read(IN,$a,2);
 
-  push(@buffer, $a[$leftc]);
-  shift(@buffer) if (@buffer > DELAY);
-
-  $c = $polty * (unpack("s",$a[1-$leftc]) + unpack("s",$buffer[0]));
+  $c = $polty * unpack("s",$a);
   print G pack("s",$c);
   $len ++;
   if ($prev_c > 0 && $c <= 0) {
-    bit($len > BITLEN*1.5);
+    bit($len > $conf{'bitlen'}*1.5);
     $len = 0;
   }
   $prev_c = $c;

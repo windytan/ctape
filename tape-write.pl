@@ -9,15 +9,19 @@
 #
 # (c) Oona "windytan" Räisänen 2012-2013
 #
-# MIT license
+# ISC license
 #
 
 use warnings;
 use strict;
 
-use constant BITLEN => 8;
-use constant DELAY  => 32;
-use constant VOLUME => 0.98;
+my %conf;
+open(IN,"ctape.conf") or die($!);
+for (<IN>) {
+  chomp;
+  $conf{$1} = $2 if (/^(\S+) (.+)/);
+}
+close(IN);
 
 # start bit (1)
 # 8 data (msb first)
@@ -26,33 +30,17 @@ use constant VOLUME => 0.98;
 # start byte seq: 0x08 0x07 0x05 0x04
 
 open(IN,$ARGV[0]) or die ($!);
-open(OUT,"|sox -q -t .raw -r 44100 -c 2 -b 16 -e signed-integer - -t alsa hw:1") or die ($!);
-#open(OUT,"|sox -q -t .raw -r 44100 -c 2 -b 16 -e signed-integer - nauhalle.wav") or die ($!);
+open(OUT,"|sox -q -t .raw -r 44100 -c 1 -b 16 -e signed-integer - ".$conf{'device'}) or die ($!);
 
 my @buffer = ();
 $buffer[0] = pack("s",0);
 
-# Channel & polarity calibration header
-# Left channel:  1 bitlength negative, 3 bitlengths positive
-# Right channel: 2 bitlengths negative, 2 bitlengths positive
+# Polarity calibration header
+# 1 bitlength negative, 3 bitlengths positive
 my $round, my $b;
 for $round (0..500) {
-  for $b (0..BITLEN-1) {
-    print OUT pack("s",-32767 * VOLUME);
-    print OUT pack("s", 32767 * VOLUME);
-  }
-  for $b (0..BITLEN-1) {
-    print OUT pack("s", 32767 * VOLUME);
-    print OUT pack("s",-32767 * VOLUME);
-  }
-  for $b (0..BITLEN-1) {
-    print OUT pack("s", 32767 * VOLUME);
-    print OUT pack("s", 32767 * VOLUME);
-  }
-  for $b (0..BITLEN-1) {
-    print OUT pack("s", 32767 * VOLUME);
-    print OUT pack("s", 32767 * VOLUME);
-  }
+  print OUT pack("s",-32767 * $conf{'volume'}) for (0..$conf{'bitlen'}-1);
+  print OUT pack("s", 32767 * $conf{'volume'}) for (0..$conf{'bitlen'}*3-1);
 }
 
 # 50-byte lead-in
@@ -71,32 +59,18 @@ close(OUT);
 close(IN);
 
 
-
 sub putbyte {
   putbit(1);
-  my $shft;
-  for $shft (0..7) {
-    putbit((ord($_[0]) >> (7-$shft)) & 1);
-  }
+  putbit((ord($_[0]) >> (7-$_)) & 1) for (0..7);
   putbit(0);
 }
 
 sub putbit {
   if ($_[0]) {
-    delay_write (pack("s",-32767 * VOLUME), BITLEN);
-    delay_write (pack("s", 32767 * VOLUME), BITLEN);
-  } else     {
-    delay_write (pack("s",-32767 * VOLUME/2), BITLEN/2);
-    delay_write (pack("s", 32767 * VOLUME/2), BITLEN/2);
-  }
-}
-
-sub delay_write {
-  my $s;
-  for $s (0..$_[1]-1) {
-    push(@buffer, $_[0]);
-    shift(@buffer) if (@buffer > DELAY);
-    print OUT $buffer[$#buffer];
-    print OUT $buffer[0];
+    print OUT pack("s",-32767 * $conf{'volume'}) x $conf{'bitlen'};
+    print OUT pack("s", 32767 * $conf{'volume'}) x $conf{'bitlen'};
+  } else {
+    print OUT pack("s",-32767 * $conf{'volume'}/2) x ($conf{'bitlen'}/2);
+    print OUT pack("s", 32767 * $conf{'volume'}/2) x ($conf{'bitlen'}/2);
   }
 }

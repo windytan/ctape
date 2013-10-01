@@ -4,6 +4,12 @@ ctape
 Save digital data onto a Compact Cassette using a format
 resembling that of Commodore Datassette.
 
+Needs a config file named `ctape.conf`. Example:
+
+ device -t alsa "hw:0"
+ bitlen 16
+ volume 0.98
+
 Usage:
 
 * encoding: `./tape-write.pl FILE`
@@ -22,6 +28,6 @@ a long-range acoustic weapon.
 
 Requires [SoX](http://sox.sourceforge.net/).
 
-© windytan (Oona Räisänen) 2012
+© windytan (Oona Räisänen)
 
-MIT license
+ISC license
