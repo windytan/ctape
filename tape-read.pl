@@ -4,9 +4,9 @@
 #
 # read data from a Compact Cassette
 #
-# (c) Oona "windytan" Räisänen 2012-2013
+# (c) windytan (Oona Räisänen)
 #
-# MIT license
+# ISC license
 #
 
 use warnings;

@@ -7,7 +7,7 @@
 #
 # Usage: tape-write.pl datafile
 #
-# (c) Oona "windytan" Räisänen 2012-2013
+# (c) windytan (Oona Räisänen)
 #
 # ISC license
 #
