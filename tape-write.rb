@@ -10,7 +10,11 @@ $bitlen = conf['bitlen']
 $device = conf['device']
 $volume = conf['volume']
 
+$stderr.puts "Opening sox.."
+
 $sox = IO.popen('sox -q -t .raw -r 44100 -c 1 -b 16 -e signed-integer - '+$device,'w')
+
+$stderr.puts "Sox opened!"
 
 def putbyte(value)
   putbit 1
@@ -19,6 +23,7 @@ def putbyte(value)
 end
 
 def putbit(value)
+  $stderr.write "Writing to sox.. "
   if value == 1
     $bitlen.times     { $sox.write [-0x7FFF * $volume].pack("s") }
     $bitlen.times     { $sox.write [ 0x7FFF * $volume].pack("s") }
@@ -26,6 +31,7 @@ def putbit(value)
     ($bitlen/2).times { $sox.write [-0x7FFF * $volume * 0.5].pack("s") }
     ($bitlen/2).times { $sox.write [ 0x7FFF * $volume * 0.5].pack("s") }
   end
+  $stderr.puts "Done!
 end
 
 # Polarity calibration header
@@ -44,5 +50,7 @@ for i in [0x08, 0x07, 0x05, 0x04] do putbyte(i) end
 until STDIN.eof?
   putbyte STDIN.read(1).unpack('C')[0]
 end
+
+$stderr.puts "Closing sox.."
 
 $sox.close
