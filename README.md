@@ -6,7 +6,7 @@ resembling that of Commodore Datassette.
 
 Needs a config file named `config.yml`. Example:
 
-    device: -t alsa "hw:0"
+    device: -t alsa "default"
     bitlen: 16
     volume: 0.98
 
