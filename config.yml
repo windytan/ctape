@@ -3,6 +3,7 @@
 #
 # device: output.wav
 # device: -t coreaudio default
+# device: -t alsa hw:1
 device: output.wav
 
 # PCM samples per bit
