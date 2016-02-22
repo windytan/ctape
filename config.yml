@@ -10,4 +10,4 @@ device: output.wav
 bitlen: 8
 
 # square wave amplitude (0-1)
-volume: 0.95
+volume: 0.10
