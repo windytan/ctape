@@ -17,8 +17,8 @@ Usage:
 
 Explanation and videos in [this blog post](http://windytan.blogspot.fi/2012/08/vintage-bits-on-cassettes.html).
 
-NOTE (2017): This is an art project, built for fun, and not many people have even got it
-working. Can you find why it doesn't work? Can you perhaps fix it?
+NOTE: This is an art project, built for fun, and not in active development any more.
+Many people haven't gotten it working. Can you find why it doesn't work? Can you perhaps fix it?
 
 `tape-write.rb` encodes data from stdin to the sound card. `tape-read.rb` records from
 the sound card and decodes to stdout.
